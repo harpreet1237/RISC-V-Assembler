@@ -119,6 +119,10 @@ int main(int argc, char *argv[]) {
 
                     // Getting the machine code of the instruction
                     machine_code = process_Instruction(line, Instruction_Address);
+                    if(machine_code == -1) {
+                        cerr << "Error in assembly Code" << endl;
+                        exit(1);
+                    }
                     cout << Instruction_Address << " " << machine_code << endl;
                     Instruction_Address += 4;
                     continue;
@@ -128,6 +132,10 @@ int main(int argc, char *argv[]) {
                     // Getting the machine code of the instruction
 
                     machine_code = process_Instruction(tokens[tokens.size() - 1], Instruction_Address);
+                    if(machine_code == -1) {
+                        cerr << "Error in assembly Code" << endl;
+                        exit(1);
+                    }
                     cout << Instruction_Address << " " << machine_code << endl;
                     Instruction_Address += 4;
                 }

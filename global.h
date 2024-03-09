@@ -7,8 +7,10 @@ uint32_t Instruction_Address = 0;
 
 map<string,uint32_t>opcode;
 map<string,string>format_code;
-map<std::string, uint32_t> func3;
-map<std::string, uint32_t> func7;
+map<string, uint32_t> func3;
+map<string, uint32_t> func7;
+map<string, uint32_t> registerfile;
+map<string,string>offset_ready;
 
 vector<string> R_Format = {"add", "and", "or", "sll", "slt", "sra", "srl", "sub", "xor", "mul", "div", "rem"};
 vector<string> I_Format = {"addi", "andi", "ori", "lb", "ld", "lh", "lw", "jalr","slli","srai"};
@@ -17,11 +19,9 @@ vector<string> SB_Format = {"beq", "bne", "bge", "blt"};
 vector<string> U_Format = {"auipc", "lui"};
 vector<string> UJ_Format = {"jal"};
 
-void trimStrings(vector<string>&tokens) {       //utility function to trim vector of strings 
-    for(int i=0;i<tokens.size();i++) {
-        tokens[i] = trim(tokens[i]);
-    }
-}
+vector<string> I_offsetreadyFormat = {"orri","addi","andi","slli","srai","srli","ori","jalr"};
+vector<string> I_offsetfetchFormat = {"lw","lh","ld","lb"};
+
 
 void initialize_globals() {
     
@@ -49,6 +49,15 @@ void initialize_globals() {
         format_code[operation_code] = "UJ";
     }
 
+    //initialize format_offset
+
+    for(auto operation_code:I_offsetfetchFormat) {
+        offset_ready[operation_code] = "FETCH";
+    }
+
+    for(auto operation_code:I_offsetreadyFormat) {
+        offset_ready[operation_code] = "READY";
+    }
     // initialize opcodes for respective formats
     //R-Format
     opcode["add"] = 51;  // 0110011
@@ -144,8 +153,46 @@ void initialize_globals() {
     func3["bge"] = 5;
     func3["blt"] = 4;
 
-}
+    //Initialization of Register file address
 
+    for (int i = 0; i < 32; i++) {
+        string reg = "x" + to_string(i);
+        registerfile[reg] = i; // Assigning the address directly as of the index
+    }
+
+    //if t0,t1 used
+    for (int i = 0; i < 7; i++) {
+        string reg = "t" + to_string(i);
+        if(i >=3) {
+            registerfile[reg] = i + 25;
+        } else {
+            registerfile[reg] = i + 5; 
+        }
+    }
+
+    // if a0 - a7 are used
+    for (int i = 0; i < 8; i++) {
+        string reg = "a" + to_string(i);
+        registerfile[reg] = i + 10; // Example address for a0 to a7
+    }
+
+    // s0 to s11 registers
+    registerfile["s0"] = 8;
+    registerfile["s1"] = 9;
+    for (int i = 2; i < 12; i++) {
+        string reg = "s" + to_string(i);
+        registerfile[reg] = i + 16; // Example address for s0 to s11
+    }
+
+    //special register names
+    registerfile["ra"] = registerfile["x1"];
+    registerfile["sp"] = registerfile["x2"];
+    registerfile["gp"] = registerfile["x3"];
+    registerfile["tp"] = registerfile["x4"];
+    registerfile["zero"] = registerfile["x0"];
+
+    
+}
 
 
 
@@ -213,7 +260,7 @@ string concatenateWithWhitespace(const vector<string>& vec) {
     return result;
 }
 
-int countOccurrences(const std::string& str, char ch) { // Count the number of occurences of a char in a string
+int countOccurrences(const string& str, char ch) { // Count the number of occurences of a char in a string
     int count = 0;
     // Iterate through each character in the string
     for (char c : str) {
@@ -223,6 +270,33 @@ int countOccurrences(const std::string& str, char ch) { // Count the number of o
         }
     }
     return count;
+}
+
+void trimStrings(vector<string>&tokens) {       //utility function to trim vector of strings 
+    for(int i=0;i<tokens.size();i++) {
+        tokens[i] = trim(tokens[i]);
+    }
+}
+
+pair<string,int> getrs1(string offset_rs1) {
+    string offset_string;
+    string rs1;
+    bool isoffset = true;
+    for(auto x:offset_rs1) {
+        if(x == '(' || x == ')') {
+            isoffset = false;
+        } else {
+            if(isoffset) {
+                offset_string += x;
+            } else {
+                rs1 += x;
+            }
+        }
+    }
+
+    int offset = stoi(offset_string);
+    
+    return {rs1,offset};
 }
 
 uint32_t process_Instruction(string& Inst, uint32_t& Instruction_Address);
