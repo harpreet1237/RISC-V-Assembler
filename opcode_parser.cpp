@@ -93,6 +93,7 @@ uint32_t decodeSFormat(vector<string>&tokens) {
     pair<string,int> rs2_offset = getrs_offset(tokens[2]);
     rs2 = rs2_offset.first;
     offset = rs2_offset.second;
+    offset = (offset & 0xFFF);
     int imm1 = (offset & 0xFE0);
     int imm2 = (offset & 0x1F);
 
