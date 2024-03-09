@@ -4,6 +4,18 @@ using namespace std;
 map<string, uint32_t> lbl_mp; // maps labels to the instruction address
 uint32_t Instruction_Address = 0;
 
+
+map<string,uint32_t>opcode;
+map<string,string>format_code;
+
+
+vector<string> R_Format = {"add", "and", "or", "sll", "slt", "sra", "srl", "sub", "xor", "mul", "div", "rem"};
+vector<string> I_Format = {"addi", "andi", "ori", "lb", "ld", "lh", "lw", "jalr","slli","srai"};
+vector<string> S_Format = {"sb", "sw", "sd", "sh"};
+vector<string> SB_Format = {"beq", "bne", "bge", "blt"};
+vector<string> U_Format = {"auipc", "lui"};
+vector<string> UJ_Format = {"jal"};
+
 string trim(const string& str) { // Function to trim the leading and trailing whitespaces in string
     size_t start = str.find_first_not_of(" \t");
     if (start == string::npos) {
@@ -63,3 +75,6 @@ int countOccurrences(const std::string& str, char ch) { // Count the number of o
     }
     return count;
 }
+
+uint32_t process_Instruction(string& Inst, uint32_t& Instruction_Address);
+void initialize_globals();
