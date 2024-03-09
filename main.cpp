@@ -4,8 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "global.hh"
-// #include "opcode_parser.cpp"
+#include "opcode_parser.cpp"
 
 using namespace std;
 
@@ -16,10 +15,11 @@ int main(int argc, char *argv[]) {
         cerr << "Usage: " << argv[0] << " <Input filename> <Output filename>" << endl;
         return 1;
     }
+    
+    initialize_globals();
 
     freopen(argv[1], "r", stdin);
     freopen(argv[2], "w", stdout);
-
     bool TEXT_SEG = true, DATA_SEG = false;
     string line;
 
@@ -118,10 +118,12 @@ int main(int argc, char *argv[]) {
                 if(line.find(":") == string::npos) { // Label is not present in the current line
 
                     // Getting the machine code of the instruction
-                    cout << Instruction_Address << " " << tokens[tokens.size() - 1] << endl;
-
-                    // machine_code = process_Instruction(line, Instruction_Address);
-
+                    machine_code = process_Instruction(line, Instruction_Address);
+                    if(machine_code == -1) {
+                        cerr << "Error in assembly Code" << endl;
+                        exit(1);
+                    }
+                    cout << Instruction_Address << " " << machine_code << endl;
                     Instruction_Address += 4;
                     continue;
                 }
@@ -129,9 +131,12 @@ int main(int argc, char *argv[]) {
                 if(tokens.size() == num_labels + 1) { 
                     // Getting the machine code of the instruction
 
-                    cout << Instruction_Address << " " << tokens[tokens.size() - 1] << endl;
-
-                    // machine_code = process_Instruction(tokens[tokens.size() - 1], Instruction_Address);
+                    machine_code = process_Instruction(tokens[tokens.size() - 1], Instruction_Address);
+                    if(machine_code == -1) {
+                        cerr << "Error in assembly Code" << endl;
+                        exit(1);
+                    }
+                    cout << Instruction_Address << " " << machine_code << endl;
                     Instruction_Address += 4;
                 }
             }
