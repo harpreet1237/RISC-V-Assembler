@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
 
             if(tokens[0] == ".data") { // DATA SEGEMENT
                 DATA_SEG = true; TEXT_SEG = false;
+                continue;
 
             } else if (tokens[0] == ".text") { // TEXT SEGMENT
                 TEXT_SEG = true; DATA_SEG = false;
@@ -98,6 +99,7 @@ int main(int argc, char *argv[]) {
 
             if(tokens[0] == ".data") { // DATA SEGEMENT
                 DATA_SEG = true; TEXT_SEG = false;
+                continue;
 
             } else if (tokens[0] == ".text") { // TEXT SEGMENT
                 TEXT_SEG = true; DATA_SEG = false;
@@ -136,12 +138,78 @@ int main(int argc, char *argv[]) {
                         cerr << "Error in assembly Code" << endl;
                         exit(1);
                     }
+                    text_mc.push_back({Instruction_Address, machine_code});
                     cout << Instruction_Address << " " << machine_code << endl;
                     Instruction_Address += 4;
                 }
             }
+
+            if(DATA_SEG) {
+                int data_size = -1; // getting the size of the data_type
+                for (auto token: tokens) {
+                    if (token[0] == '.') {
+                        for (auto a_d: assembler_directives) {
+                            if(a_d.first == token) {
+                                data_size = a_d.second;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if(data_size == -1) {
+                    cout << "assembler directive to indicate data type not included in data segment" << endl;
+                    exit(1);
+                }
+
+                bool array = false;
+                size_t pos = line.find('('); // array
+                if (pos != string::npos) {
+                    array = true; 
+                    string vals = line.substr (pos + 1);
+                    vals.erase(vals.size() - 1); // erasing the last ')' character
+
+                    vector<int64_t> array = extractIntegers(vals);
+                    for(auto element:array) {
+                        data_mc.push_back({Data_Address, int64ToHex(element, data_size)});
+                        Data_Address += data_size; // Increment by "Data_Size" bytes.
+                    }
+                    continue;
+                }
+                pos = line.find('"'); // string (.asciz)
+                if (pos != string::npos) {
+                    array = true; 
+                    string asciz_str = line.substr (pos + 1);
+                    asciz_str.erase(asciz_str.size() - 1); // erasing the last '"' character
+
+                    // including an '\0' character in end
+                    asciz_str.push_back('\0');
+
+                    for(char c: asciz_str) {
+                        data_mc.push_back({Data_Address, int64ToHex(static_cast<int64_t>(c), 1)});
+                        Data_Address += 1; // increment by 1 byte.
+                    }
+                    continue;
+                }
+
+                // Handling Logic for Single Value element
+                int64_t element = parseInteger(tokens[tokens.size() - 1]);
+                data_mc.push_back({Data_Address, int64ToHex(element, data_size)});
+                Data_Address += data_size;
+            }
         }
     }
 
+    // Writing the ouput.mc file
+    for (auto entry: data_mc) { // DATA SEGMENT
+        auto address = uint32ToHex(entry.first);
+        cout << address << " " << entry.second << endl;
+    }
+    cout << endl;
+    for (auto entry: text_mc) { // TEXT SEGMENT
+        auto address = uint32ToHex(entry.first);
+        auto machine_code = uint32ToHex(entry.second);
+        cout << address << " " << machine_code << endl;
+    }
     return 0;
 }
