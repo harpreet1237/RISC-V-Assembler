@@ -120,11 +120,54 @@ uint32_t decodeSBFormat(vector<string>&tokens,uint32_t Instruction_Address) {
 }
 
 uint32_t decodeUFormat(vector<string>&tokens) {
-    
+    string instruction_name = tokens[0];
+    string rd = tokens[1];
+    int offset = stoi(tokens[2]);
+
+    uint32_t machine_code = 0;
+
+    machine_code += (offset & 0xFFFFF000);      //20-bit added
+    machine_code << 5;
+    machine_code += registerfile[rd];           //rd added
+    machine_code << 7;
+    machine_code += opcode[instruction_name];   //opcode added
+
+    return machine_code;
+
 }
 
 uint32_t decodeUJFormat(vector<string>&tokens) {
-    
+    string instruction_name = tokens[0];
+    string rd = tokens[1];
+    int offset = 0;
+
+    if(isInteger(tokens[2])) {
+            offset = stoi(tokens[2]);
+            offset = (offset & 0xFFFFF);
+    } else {
+        if(lbl_mp.count(tokens[2])) {       //replacing label with offset from current Instruction address
+            offset = lbl_mp[tokens[2]] - Instruction_Address;
+            offset = (offset & 0xFFFFF);
+        } else {
+            return -1;
+        }
+    }
+
+    uint32_t machine_code = 0;
+    machine_code += (offset & 0x100000);        //taking 20th bit 
+    machine_code << 10;
+    machine_code += (offset & 0x7FE);           //taking 1-10th bit
+    machine_code << 1;
+    machine_code += (offset & 0x800);           //taking 11th bit
+    machine_code << 8;
+    machine_code += (offset & 0xFF000);         //taking 12-19th bit
+    machine_code << 5;
+    machine_code += registerfile[rd];           //taking rd register
+    machine_code << 7;
+    machine_code += opcode[instruction_name];   //adding opcode
+
+    return machine_code;
+
 }
 
 uint32_t process_Instruction(string& Inst, uint32_t& Instruction_Address) {
