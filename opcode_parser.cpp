@@ -35,7 +35,7 @@ uint32_t decodeRFormat(vector<string>&tokens) {
     return machine_code;
 }
 
-uint32_t decodeIFormat(vector<string>&tokens) {
+uint32_t decodeIFormat(vector<string>&tokens,uint32_t Instruction_Address) {
     string instruction_name = tokens[0];        //instruction name
     string rd = tokens[1];                      //fetching rd
     string rs1;
@@ -48,20 +48,27 @@ uint32_t decodeIFormat(vector<string>&tokens) {
         offset = (offset & 0xFFF);              // offset set to 12 bit 2s-compliment
 
     } else if(offset_ready[instruction_name] == "FETCH") {
-        pair<string,int> rs1_offset = getrs1(tokens[2]);    // offset(rs1) -> fetched to pair<rs1,offset>
+        pair<string,int> rs1_offset = getrs_offset(tokens[2]);    // offset(rs1) -> fetched to pair<rs1,offset>
         rs1 = rs1_offset.first;
         offset = rs1_offset.second;
         offset = (offset & 0xFFF);              //12 bit 2s-compliment 
 
     } else if(instruction_name == "jalr") {
         rs1 = tokens[2];
-        offset = stoi(tokens[3]);
-        offset = (offset & 0xFFF);
+        if(isInteger(tokens[3])) {
+            offset = stoi(tokens[3]);
+            offset = (offset & 0xFFF);
+        } else {
+            if(lbl_mp.count(tokens[3])) {       //replacing label with offset from current Instruction address
+                offset = lbl_mp[tokens[3]] - Instruction_Address;
+            } else {
+                return -1;
+            }
+        }
 
     } else {
         return -1;
     }
-
 
     uint32_t machine_code = 0;
     machine_code += offset;                 //12 bit offset added
@@ -78,11 +85,38 @@ uint32_t decodeIFormat(vector<string>&tokens) {
 }
 
 uint32_t decodeSFormat(vector<string>&tokens) {
-    
+    string instruction_name = tokens[0];
+    string rs1 = tokens[1];
+    string rs2;
+    int offset = 0;
+
+    pair<string,int> rs2_offset = getrs_offset(tokens[2]);
+    rs2 = rs2_offset.first;
+    offset = rs2_offset.second;
+    offset = (offset & 0xFFF);
+    int imm1 = (offset & 0xFE0);
+    int imm2 = (offset & 0x1F);
+
+    uint32_t machine_code = 0;
+
+    machine_code += imm1;
+    machine_code << 5;
+    machine_code += registerfile[rs2];
+    machine_code << 5;
+    machine_code += registerfile[rs1];
+    machine_code << 3;
+    machine_code += func3[instruction_name];
+    machine_code << 5;
+    machine_code += imm2;
+    machine_code << 7;
+    machine_code += opcode[instruction_name];
+
+    return machine_code;
+
 }
 
-uint32_t decodeSBFormat(vector<string>&tokens) {
-    
+uint32_t decodeSBFormat(vector<string>&tokens,uint32_t Instruction_Address) {
+
 }
 
 uint32_t decodeUFormat(vector<string>&tokens) {
@@ -106,11 +140,11 @@ uint32_t process_Instruction(string& Inst, uint32_t& Instruction_Address) {
     if(format_code[operation_token] == "R"){
         machine_code = decodeRFormat(tokens);
     } else if (format_code[operation_token] == "I") {
-        machine_code = decodeIFormat(tokens);
+        machine_code = decodeIFormat(tokens,Instruction_Address);
     } else if (format_code[operation_token] == "S") {
         machine_code = decodeSFormat(tokens);
     } else if(format_code[operation_token] == "SB") {
-        machine_code = decodeSBFormat(tokens);
+        machine_code = decodeSBFormat(tokens,Instruction_Address);
     } else if(format_code[operation_token] == "U") {
         machine_code = decodeUFormat(tokens);
     } else if (format_code[operation_token] == "UJ") {
