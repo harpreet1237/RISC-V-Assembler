@@ -3,7 +3,13 @@ using namespace std;
 // GLOBAL DEFINITIONS
 map<string, uint32_t> lbl_mp; // maps labels to the instruction address
 uint32_t Instruction_Address = 0;
+uint32_t Data_Address = 65536;
 
+// assembler directives (data_types in .data segment)
+// (and corresponding size)
+vector<pair<string, int>> assembler_directives = {{".byte", 1}, {".half", 2}, {".word", 4}, {".dword", 8}, {".asciz", 0}, {".asciiz", 0}};
+vector<pair<uint32_t, string>> data_mc; // address --> data_string
+vector<pair<uint32_t, uint32_t>> text_mc; // address --> machine code
 
 map<string,uint32_t>opcode;
 map<string,string>format_code;
@@ -297,6 +303,80 @@ pair<string,int> getrs1(string offset_rs1) {
     int offset = stoi(offset_string);
     
     return {rs1,offset};
+}
+
+// Function to convert string representation to int64_t
+int64_t parseInteger(const string& str) {
+    // Check if the string starts with "0x" or "0b"
+    if (str.substr(0, 2) == "0x") {
+        // Convert hexadecimal string to int64_t
+        return stoll(str, nullptr, 16);
+    } else if (str.substr(0, 2) == "0b") {
+        // Convert binary string to int64_t
+        return stoll(str.substr(2), nullptr, 2);
+    } else {
+        // Convert decimal string to int64_t
+        return stoll(str);
+    }
+}
+
+// Function to extract integers from a string and return a vector<int64_t>
+vector<int64_t> extractIntegers(const string& input) {
+    istringstream iss(input);
+    vector<int64_t> integers;
+
+    string token;
+    while (getline(iss, token, ',')) {
+        // Trim leading and trailing spaces
+        auto start = token.find_first_not_of(" ");
+        auto end = token.find_last_not_of(" ");
+        if (start != string::npos && end != string::npos) {
+            token = token.substr(start, end - start + 1);
+        } else {
+            // Skip empty strings
+            continue;
+        }
+
+        // Convert string representation to int64_t and add to vector
+        integers.push_back(parseInteger(token));
+    }
+
+    return integers;
+}
+
+// Function to convert int64_t to hexadecimal string of given length (in bytes) with "0x" prefix
+string int64ToHex(int64_t value, int lengthBytes) {
+    // Create a stringstream to format the hexadecimal representation
+    stringstream ss;
+    ss << hex << uppercase << setw(lengthBytes * 2) << setfill('0') << value;
+
+    // Extract the formatted hexadecimal string
+    string hexStr = ss.str();
+
+    // Adjust the length of the hexadecimal string if needed
+    if (hexStr.length() > lengthBytes * 2) {
+        hexStr = hexStr.substr(hexStr.length() - lengthBytes * 2);
+    }
+
+    // Prepend "0x" to the hexadecimal string
+    hexStr = "0x" + hexStr;
+
+    return hexStr;
+}
+
+// Function to convert uint32_t to 4-byte hexadecimal string with "0x" prefix
+string uint32ToHex(uint32_t value) {
+    // Create a stringstream to format the hexadecimal representation
+    stringstream ss;
+    ss << hex << uppercase << setw(8) << setfill('0') << value;
+
+    // Extract the formatted hexadecimal string
+    string hexStr = ss.str();
+
+    // Prepend "0x" to the hexadecimal string
+    hexStr = "0x" + hexStr;
+
+    return hexStr;
 }
 
 uint32_t process_Instruction(string& Inst, uint32_t& Instruction_Address);

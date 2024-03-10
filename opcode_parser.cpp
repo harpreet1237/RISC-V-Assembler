@@ -78,19 +78,53 @@ uint32_t decodeIFormat(vector<string>&tokens) {
 }
 
 uint32_t decodeSFormat(vector<string>&tokens) {
-    
+
 }
 
-uint32_t decodeSBFormat(vector<string>&tokens) {
+uint32_t decodeSBFormat(vector<string>&tokens,uint32_t Instruction_Address) {
+    string instruction_name = tokens[0];
+    string rs1 = tokens[1];
+    string rs2 = tokens[2];
+    int offset = 0;
+
+    if(isInteger(tokens[3])) {
+            offset = stoi(tokens[3]);
+            offset = (offset & 0xFFF);
+    } else {
+        if(lbl_mp.count(tokens[3])) {       //replacing label with offset from current Instruction address
+            offset = lbl_mp[tokens[3]] - Instruction_Address;
+        } else {
+            return -1;
+        }
+    }
     
+    uint32_t machine_code = 0;
+
+    machine_code += (offset & 0x1000);       //12th bit 
+    machine_code << 6;
+    machine_code += (offset & 0x7E0);       //5-10th bit
+    machine_code << 5;
+    machine_code += registerfile[rs2];      //rs2 added
+    machine_code << 5;
+    machine_code += registerfile[rs1];      //rs1 added 
+    machine_code << 3;
+    machine_code += func3[instruction_name];//func3 added
+    machine_code << 4;
+    machine_code += (offset & 0x1E);        //1-4thbit added
+    machine_code << 1;
+    machine_code += (offset & 0x800);       //11th bit
+    machine_code << 7;
+    machine_code += opcode[instruction_name];//opcode
+
+    return machine_code;
 }
 
 uint32_t decodeUFormat(vector<string>&tokens) {
-    
+  
 }
 
 uint32_t decodeUJFormat(vector<string>&tokens) {
-    
+   
 }
 
 uint32_t process_Instruction(string& Inst, uint32_t& Instruction_Address) {
@@ -110,7 +144,7 @@ uint32_t process_Instruction(string& Inst, uint32_t& Instruction_Address) {
     } else if (format_code[operation_token] == "S") {
         machine_code = decodeSFormat(tokens);
     } else if(format_code[operation_token] == "SB") {
-        machine_code = decodeSBFormat(tokens);
+        machine_code = decodeSBFormat(tokens, Instruction_Address);
     } else if(format_code[operation_token] == "U") {
         machine_code = decodeUFormat(tokens);
     } else if (format_code[operation_token] == "UJ") {
