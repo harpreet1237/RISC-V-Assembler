@@ -3,7 +3,6 @@
 byte_test: .byte 2									# Byte			(1 Byte)
 word_test: .word (-1, 0xFFF, 0b11001 , 15636)		# word			(4 Bytes)
 asci_test: .asciiz "Hello World!"					# asciiz char	(1 Byte per char)
-dwrd_test: .dword 0xFFFFFFFFF						# double word	(8 Bytes)
 .hwrd_test: .half (123, 0b101011, 0xFACC) 			# Half word 	(2 Bytes)
 
 .text
@@ -17,7 +16,6 @@ fact: # called fact with x10 = n
 	 addi sp,sp,-8 # making space in stack for 2 entries (8 Bytes)
 	 sw   x1,4(sp) # storing return address
 	 sw   x10,0(sp) # storing the value of 'n'
-	 addi x5,x10,-1 # x5 <= n-1
      addi x7, x0, 1 # x7 <= 1
      
 	 bge  x5,x7,L1  # compare n-1 with 1;

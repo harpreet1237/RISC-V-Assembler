@@ -66,67 +66,68 @@ void initialize_globals() {
     }
     // initialize opcodes for respective formats
     //R-Format
-    opcode["add"] = 51;  // 0110011
-    opcode["and"] = 51;  // 0110011
-    opcode["or"] = 51;   // 0110011
-    opcode["sll"] = 51;  // 0110011
-    opcode["slt"] = 51;  // 0110011
-    opcode["sra"] = 51;  // 0110011
-    opcode["srl"] = 51;  // 0110011
-    opcode["sub"] = 51;  // 0110011
-    opcode["xor"] = 51;  // 0110011
-    opcode["mul"] = 51;  // 0110011
-    opcode["div"] = 51;  // 0110011
-    opcode["rem"] = 51;  // 0110011
+    opcode["add"] = 0x33;  // 0110011
+    opcode["and"] = 0x33;  // 0110011
+    opcode["or"]  = 0x33;  // 0110011
+    opcode["sll"] = 0x33;  // 0110011
+    opcode["slt"] = 0x33;  // 0110011
+    opcode["sra"] = 0x33;  // 0110011
+    opcode["srl"] = 0x33;  // 0110011
+    opcode["sub"] = 0x33;  // 0110011
+    opcode["xor"] = 0x33;  // 0110011
+    opcode["mul"] = 0x33;  // 0110011
+    opcode["div"] = 0x33;  // 0110011
+    opcode["rem"] = 0x33;  // 0110011
 
     //I-Format
-    opcode["addi"] = 19;  // 0010011
-    opcode["andi"] = 19;  // 0010011
-    opcode["ori"] = 19;   // 0010011
-    opcode["lb"] = 3;     // 0000011
-    opcode["ld"] = 3;     // 0000011
-    opcode["lh"] = 3;     // 0000011
-    opcode["lw"] = 3;     // 0000011
-    opcode["jalr"] = 103; // 1100111
+    opcode["addi"]  = 0x13;  // 0010011
+    opcode["andi"]  = 0x13;  // 0010011
+    opcode["ori"]   = 0x13;  // 0010011
+    opcode["lb"]    = 0x3;   // 0000011
+    opcode["ld"]    = 0x3;   // 0000011
+    opcode["lh"]    = 0x3;   // 0000011
+    opcode["lw"]    = 0x3;   // 0000011
+    opcode["jalr"]  = 0x67;  // 1100111
+    opcode["slli"]  = 0x13;
 
     //S-Format
-    opcode["sb"] = 23;  // 0100011
-    opcode["sw"] = 27;  // 0100011
-    opcode["sd"] = 31;  // 0100011
-    opcode["sh"] = 25;  // 0100011
+    opcode["sb"] = 0x23;  // 0100011
+    opcode["sw"] = 0x23;  // 0100011
+    opcode["sd"] = 0x23;  // 0100011
+    opcode["sh"] = 0x23;  // 0100011
 
 
     //SB-Format
-    opcode["beq"] = 99;  // 1100011
-    opcode["bne"] = 99;  // 1100011
-    opcode["bge"] = 99;  // 1100011
-    opcode["blt"] = 99;  // 1100011
+    opcode["beq"] = 0x63;  // 1100011
+    opcode["bne"] = 0x63;  // 1100011
+    opcode["bge"] = 0x63;  // 1100011
+    opcode["blt"] = 0x63;  // 1100011
 
     //U-Format
-    opcode["auipc"] = 23; // 0010111
-    opcode["lui"] = 55;   // 0110111
+    opcode["auipc"] = 0x17;   // 0010111
+    opcode["lui"]   = 0x37;   // 0110111
 
     //UJ-Format
-    opcode["jal"] = 111; // 1101111
+    opcode["jal"] = 0x6F; // 1101111
 
     // Func3 for R-Format Instructions
     func3["add"] = 0;
     func3["and"] = 7;
-    func3["or"] = 6;
+    func3["or"]  = 6;
     func3["sll"] = 1;
     func3["slt"] = 2;
     func3["sra"] = 5;
     func3["srl"] = 5;
     func3["sub"] = 0;
     func3["xor"] = 4;
-    func3["mul"] = 1;
+    func3["mul"] = 0;
     func3["div"] = 4;
     func3["rem"] = 6;
 
     // Func7 for R-Format Instructions
     func7["add"] = 0;
     func7["and"] = 0;
-    func7["or"] = 0;
+    func7["or"]  = 0;
     func7["sll"] = 0;
     func7["slt"] = 0;
     func7["sra"] = 32;
@@ -140,12 +141,14 @@ void initialize_globals() {
     //Func3 for I-Format Instructions
     func3["addi"] = 0;
     func3["andi"] = 7;
-    func3["ori"] = 6;
-    func3["lb"] = 0;
-    func3["ld"] = 3;
-    func3["lh"] = 1;
-    func3["lw"] = 2;
+    func3["ori"]  = 6;
+    func3["lb"]   = 0;
+    func3["ld"]   = 3;
+    func3["lh"]   = 1;
+    func3["lw"]   = 2;
     func3["jalr"] = 0;
+    func3["slli"] = 1;
+
 
     //Func3 for S-Format Instructions
     func3["sb"] = 0;
@@ -284,27 +287,6 @@ void trimStrings(vector<string>&tokens) {       //utility function to trim vecto
     }
 }
 
-pair<string,int> getrs_offset(string offset_rs1) {
-    string offset_string;
-    string rs1;
-    bool isoffset = true;
-    for(auto x:offset_rs1) {
-        if(x == '(' || x == ')') {
-            isoffset = false;
-        } else {
-            if(isoffset) {
-                offset_string += x;
-            } else {
-                rs1 += x;
-            }
-        }
-    }
-
-    int offset = stoi(offset_string);
-    
-    return {rs1,offset};
-}
-
 // Function to convert string representation to int64_t
 int64_t parseInteger(const string& str) {
     // Check if the string starts with "0x" or "0b"
@@ -379,13 +361,85 @@ string uint32ToHex(uint32_t value) {
     return hexStr;
 }
 
-bool isInteger(string& str) {
-    for (char c : str) {
-        if (!isdigit(c) && c != '-' && c != '+') {
+bool isInteger(const string& str) {
+    // Check if the string is empty or starts with a '+' or '-'
+    if (str.empty() || (str[0] != '+' && str[0] != '-' && !isdigit(str[0]) && str[0] != '0'))
+        return false;
+
+    // Check if it's a hexadecimal value (starts with "0x" or "0X")
+    if (str.size() >= 3 && (str.substr(0, 2) == "0x" || str.substr(0, 2) == "0X")) {
+        // Check each character of the string after "0x" or "0X"
+        for (size_t i = 2; i < str.size(); ++i) {
+            if (!isxdigit(str[i]))
+                return false;
+        }
+        return true; // It's a hexadecimal value
+    }
+
+    // Check if it's a binary value (starts with "0b" or "0B")
+    if (str.size() >= 3 && (str.substr(0, 2) == "0b" || str.substr(0, 2) == "0B")) {
+        // Check each character of the string after "0b" or "0B"
+        for (size_t i = 2; i < str.size(); ++i) {
+            if (str[i] != '0' && str[i] != '1')
+                return false;
+        }
+        return true; // It's a binary value
+    }
+
+    // Check if it's a decimal integer
+    for (size_t i = 1; i < str.size(); ++i) {
+        if (!isdigit(str[i]))
             return false;
+    }
+
+    return true; // It's a decimal integer
+}
+
+int stringToInteger(const std::string& str) {
+    // Check for negative sign
+    bool isNegative = (str.size() > 0 && str[0] == '-');
+    std::string valueStr = (isNegative) ? str.substr(1) : str;
+
+    std::stringstream ss(valueStr);
+
+    // Check for hexadecimal or binary prefix
+    if (valueStr.size() > 2 && valueStr[0] == '0') {
+        if (valueStr[1] == 'x' || valueStr[1] == 'X') {
+            uint32_t value;
+            ss >> std::hex >> value;
+            return (isNegative) ? -static_cast<int>(value) : static_cast<int>(value);
+        } else if (valueStr[1] == 'b' || valueStr[1] == 'B') {
+            uint32_t value;
+            ss >> std::setw(valueStr.size() - 2) >> std::setbase(2) >> value;
+            return (isNegative) ? -static_cast<int>(value) : static_cast<int>(value);
         }
     }
-    return true;
+
+    // Otherwise, assume decimal
+    int value;
+    ss >> value;
+    return (isNegative) ? -value : value;
+}
+
+pair<string,int> getrs_offset(string offset_rs1) {
+    string offset_string;
+    string rs1;
+    bool isoffset = true;
+    for(auto x:offset_rs1) {
+        if(x == '(' || x == ')') {
+            isoffset = false;
+        } else {
+            if(isoffset) {
+                offset_string += x;
+            } else {
+                rs1 += x;
+            }
+        }
+    }
+
+    int offset = stringToInteger(offset_string);
+    
+    return {rs1,offset};
 }
 
 uint32_t process_Instruction(string& Inst, uint32_t& Instruction_Address);

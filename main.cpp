@@ -80,8 +80,9 @@ int main(int argc, char *argv[]) {
     cin.clear();
     cin.seekg(0, ios::beg);
     // SECOND ITERATION
+    int line_number = 0;
     while (getline(cin, line)) { // Read each line of the file using std::cin
-
+        line_number += 1;
         // Find the position of '#' character in the line
         size_t pos = line.find('#');
         // If '#' character found, remove everything after it
@@ -122,10 +123,11 @@ int main(int argc, char *argv[]) {
                     // Getting the machine code of the instruction
                     machine_code = process_Instruction(line, Instruction_Address);
                     if(machine_code == -1) {
-                        cerr << "Error in assembly Code" << endl;
+                        cerr << "Error in assembly Code [line:" << line_number << "]" << endl;
                         exit(1);
                     }
-                    cout << Instruction_Address << " " << machine_code << endl;
+                    text_mc.push_back({Instruction_Address, machine_code});
+                    //cout << Instruction_Address << " " << machine_code << endl;
                     Instruction_Address += 4;
                     continue;
                 }
@@ -135,11 +137,11 @@ int main(int argc, char *argv[]) {
 
                     machine_code = process_Instruction(tokens[tokens.size() - 1], Instruction_Address);
                     if(machine_code == -1) {
-                        cerr << "Error in assembly Code" << endl;
+                        cerr << "Error in assembly Code [line:" << line_number << "]" << endl;
                         exit(1);
                     }
                     text_mc.push_back({Instruction_Address, machine_code});
-                    cout << Instruction_Address << " " << machine_code << endl;
+                    //cout << Instruction_Address << " " << machine_code << endl;
                     Instruction_Address += 4;
                 }
             }
@@ -158,7 +160,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 if(data_size == -1) {
-                    cout << "assembler directive to indicate data type not included in data segment" << endl;
+                    cerr << "ERROR [line:" << line_number - 1 <<"] wrong assembler directive/assembler directive to indicate data type not included in data segment" << endl;
                     exit(1);
                 }
 
@@ -205,7 +207,9 @@ int main(int argc, char *argv[]) {
         auto address = uint32ToHex(entry.first);
         cout << address << " " << entry.second << endl;
     }
-    cout << endl;
+    if(data_mc.size()) {
+        cout << endl;
+    }
     for (auto entry: text_mc) { // TEXT SEGMENT
         auto address = uint32ToHex(entry.first);
         auto machine_code = uint32ToHex(entry.second);
