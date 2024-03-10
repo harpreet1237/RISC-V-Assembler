@@ -202,7 +202,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // Writing the ouput.mc file
+    // Writing the given output file
     for (auto entry: data_mc) { // DATA SEGMENT
         auto address = uint32ToHex(entry.first);
         cout << address << " " << entry.second << endl;

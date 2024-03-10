@@ -421,12 +421,12 @@ int stringToInteger(const std::string& str) {
     return (isNegative) ? -value : value;
 }
 
-pair<string,int> getrs_offset(string offset_rs1) {
+pair<string,int> getrs_offset(string offset_rs1) {      //function to obtain register source and offset 
     string offset_string;
     string rs1;
     bool isoffset = true;
     for(auto x:offset_rs1) {
-        if(x == '(' || x == ')') {
+        if(x == '(' || x == ')') {                      //fetching from ()
             isoffset = false;
         } else {
             if(isoffset) {
@@ -437,7 +437,7 @@ pair<string,int> getrs_offset(string offset_rs1) {
         }
     }
 
-    int offset = stringToInteger(offset_string);
+    int offset = stringToInteger(offset_string);        //using utility function 
     
     return {rs1,offset};
 }

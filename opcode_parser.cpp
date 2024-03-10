@@ -117,7 +117,6 @@ uint32_t decodeSFormat(vector<string>&tokens) {
 
 uint32_t decodeSBFormat(vector<string>&tokens,uint32_t Instruction_Address) {
 
-// REVIEW
     string instruction_name = tokens[0];
     string rs1 = tokens[1];
     string rs2 = tokens[2];
@@ -174,7 +173,6 @@ uint32_t decodeUFormat(vector<string>&tokens) {
 
 uint32_t decodeUJFormat(vector<string>&tokens) {
 
-// REVIEW
     string instruction_name = tokens[0];
     string rd = tokens[1];
     int offset = 0;
