@@ -209,11 +209,13 @@ int main(int argc, char *argv[]) {
     }
     if(data_mc.size()) {
         cout << endl;
-    }
+    } uint32_t termination_addr;
     for (auto entry: text_mc) { // TEXT SEGMENT
+        termination_addr = entry.first;
         auto address = uint32ToHex(entry.first);
         auto machine_code = uint32ToHex(entry.second);
         cout << address << " " << machine_code << endl;
-    }
+    } termination_addr += 4;
+    cout << uint32ToHex(termination_addr) << " 0xFFFFFFFF" << endl;
     return 0;
 }
