@@ -284,7 +284,7 @@ void trimStrings(vector<string>&tokens) {       //utility function to trim vecto
     }
 }
 
-pair<string,int> getrs1(string offset_rs1) {
+pair<string,int> getrs_offset(string offset_rs1) {
     string offset_string;
     string rs1;
     bool isoffset = true;
@@ -377,6 +377,15 @@ string uint32ToHex(uint32_t value) {
     hexStr = "0x" + hexStr;
 
     return hexStr;
+}
+
+bool isInteger(string& str) {
+    for (char c : str) {
+        if (!isdigit(c) && c != '-' && c != '+') {
+            return false;
+        }
+    }
+    return true;
 }
 
 uint32_t process_Instruction(string& Inst, uint32_t& Instruction_Address);
