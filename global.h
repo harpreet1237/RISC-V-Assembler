@@ -5,6 +5,12 @@ map<string, uint32_t> lbl_mp; // maps labels to the instruction address
 uint32_t Instruction_Address = 0;
 uint32_t Data_Address = 65536;
 
+
+//Limits to Offsets 
+
+const int OFFSET_LIMIT = 2047;
+const int OFFSET_UPPER_LIMIT = 1048575;
+
 // assembler directives (data_types in .data segment)
 // (and corresponding size)
 vector<pair<string, int>> assembler_directives = {{".byte", 1}, {".half", 2}, {".word", 4}, {".dword", 8}, {".asciz", 0}, {".asciiz", 0}};
