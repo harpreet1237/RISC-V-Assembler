@@ -45,6 +45,9 @@ uint32_t decodeIFormat(vector<string>&tokens,uint32_t Instruction_Address) {
         rs1 = tokens[2];                        //fetching rs1 
         string offset_string = tokens[3];
         offset = stringToInteger(offset_string);
+        if(offset > OFFSET_LIMIT || offset < -(OFFSET_LIMIT+1)) {
+            return -1;
+        }
         offset = (offset & 0xFFF);              // offset set to 12 bit 2s-compliment
 
     } else if(offset_ready[instruction_name] == "FETCH") {
@@ -93,6 +96,11 @@ uint32_t decodeSFormat(vector<string>&tokens) {
     pair<string,int> rs1_offset = getrs_offset(tokens[2]);
     rs1 = rs1_offset.first;
     offset = rs1_offset.second;
+
+    if(offset > OFFSET_LIMIT || offset < -(OFFSET_LIMIT+1)) {
+        return -1;
+    }
+
     offset = (offset & 0xFFF);
     uint32_t imm1 = ((offset & 0xFE0) >> 5);
     uint32_t imm2 = (offset & 0x1F);
@@ -117,7 +125,6 @@ uint32_t decodeSFormat(vector<string>&tokens) {
 
 uint32_t decodeSBFormat(vector<string>&tokens,uint32_t Instruction_Address) {
 
-// REVIEW
     string instruction_name = tokens[0];
     string rs1 = tokens[1];
     string rs2 = tokens[2];
@@ -125,14 +132,24 @@ uint32_t decodeSBFormat(vector<string>&tokens,uint32_t Instruction_Address) {
 
     if(isInteger(tokens[3])) {
             offset = stringToInteger(tokens[3]);
+
+            if(offset > OFFSET_LIMIT || offset < -(OFFSET_LIMIT+1)) {
+                return -1;
+            }
+
             offset = (offset & 0xFFF);
     } else {
         if(lbl_mp.count(tokens[3])) {       //replacing label with offset from current Instruction address
             offset = lbl_mp[tokens[3]] - Instruction_Address;
+
+            if(offset > OFFSET_LIMIT || offset < -(OFFSET_LIMIT+1)) {
+                return -1;
+            }
         } else {
             return -1;
         }
     }
+
     
     uint32_t machine_code = 0;
 
@@ -160,6 +177,9 @@ uint32_t decodeUFormat(vector<string>&tokens) {
     string rd = tokens[1];
     int offset = stringToInteger(tokens[2]);
 
+    if(offset > OFFSET_UPPER_LIMIT || offset < -(OFFSET_UPPER_LIMIT+1)) {
+        return -1;
+    }
     uint32_t machine_code = 0;
 
     machine_code += (offset & 0xFFFFF);         //20-bit added
@@ -174,7 +194,6 @@ uint32_t decodeUFormat(vector<string>&tokens) {
 
 uint32_t decodeUJFormat(vector<string>&tokens) {
 
-// REVIEW
     string instruction_name = tokens[0];
     string rd = tokens[1];
     int offset = 0;
@@ -183,7 +202,16 @@ uint32_t decodeUJFormat(vector<string>&tokens) {
         offset = lbl_mp[tokens[2]] - Instruction_Address;
         offset = (offset & 0xFFFFF);
     } else {
-        return -1;
+        if(isInteger(tokens[2])) {
+            offset = stringToInteger(tokens[2]);
+            if(offset > OFFSET_UPPER_LIMIT || offset < -(OFFSET_UPPER_LIMIT+1)) {
+                return -1;
+            }
+            offset = (offset & 0xFFFFF);
+            
+        } else {
+            return -1;
+        }
     }
 
 

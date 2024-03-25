@@ -5,6 +5,12 @@ map<string, uint32_t> lbl_mp; // maps labels to the instruction address
 uint32_t Instruction_Address = 0;
 uint32_t Data_Address = 65536;
 
+
+//Limits to Offsets 
+
+const int OFFSET_LIMIT = 2047;
+const int OFFSET_UPPER_LIMIT = 1048575;
+
 // assembler directives (data_types in .data segment)
 // (and corresponding size)
 vector<pair<string, int>> assembler_directives = {{".byte", 1}, {".half", 2}, {".word", 4}, {".dword", 8}, {".asciz", 0}, {".asciiz", 0}};
@@ -427,12 +433,12 @@ int stringToInteger(const std::string& str) {
     return (isNegative) ? -value : value;
 }
 
-pair<string,int> getrs_offset(string offset_rs1) {
+pair<string,int> getrs_offset(string offset_rs1) {      //function to obtain register source and offset 
     string offset_string;
     string rs1;
     bool isoffset = true;
     for(auto x:offset_rs1) {
-        if(x == '(' || x == ')') {
+        if(x == '(' || x == ')') {                      //fetching from ()
             isoffset = false;
         } else {
             if(isoffset) {
@@ -443,7 +449,7 @@ pair<string,int> getrs_offset(string offset_rs1) {
         }
     }
 
-    int offset = stringToInteger(offset_string);
+    int offset = stringToInteger(offset_string);        //using utility function 
     
     return {rs1,offset};
 }

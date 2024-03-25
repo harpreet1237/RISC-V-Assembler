@@ -1,4 +1,11 @@
-						# Byte 			(2 Bytes) 
+
+.data
+# Data Segment Test
+byte_test: .byte 2									# Byte			(1 Byte)
+word_test: .word (-1, 0xFFF, 0b11001 , 15636)		# word			(4 Bytes)
+asci_test: .asciiz "Hello World!"					# asciiz char	(1 Byte per char)
+.hwrd_test: .half (123, 0b101011, 0xFACC) 			# Half word 	(2 Bytes)
+.word_test: .byte 2									# Byte 			(2 Bytes) 
 
 .text
 lui x20, 1
