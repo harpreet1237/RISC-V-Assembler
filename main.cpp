@@ -214,6 +214,6 @@ int main(int argc, char *argv[]) {
         auto address = uint32ToHex(entry.first);
         auto machine_code = uint32ToHex(entry.second);
         cout << address << " " << machine_code << endl;
-    }
+    } 
     return 0;
 }

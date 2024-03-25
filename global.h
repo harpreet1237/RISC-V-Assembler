@@ -17,6 +17,7 @@ map<string, uint32_t> func3;
 map<string, uint32_t> func7;
 map<string, uint32_t> registerfile;
 map<string,string>offset_ready;
+set<string> branch_opcodes;
 
 vector<string> R_Format = {"add", "and", "or", "sll", "slt", "sra", "srl", "sub", "xor", "mul", "div", "rem"};
 vector<string> I_Format = {"addi", "andi", "ori", "lb", "ld", "lh", "lw", "jalr","slli","srai"};
@@ -162,8 +163,16 @@ void initialize_globals() {
     func3["bge"] = 5;
     func3["blt"] = 4;
 
-    //Initialization of Register file address
+    // Initialization of branch_opcodes set
+    branch_opcodes.insert("beq");
+    branch_opcodes.insert("bne");
+    branch_opcodes.insert("bnez");
+    branch_opcodes.insert("bge");
+    branch_opcodes.insert("bgeu");
+    branch_opcodes.insert("blt");
+    branch_opcodes.insert("bltu");
 
+    //Initialization of Register file address
     for (int i = 0; i < 32; i++) {
         string reg = "x" + to_string(i);
         registerfile[reg] = i; // Assigning the address directly as of the index
@@ -203,9 +212,6 @@ void initialize_globals() {
     
 }
 
-
-
-
 string trim(const string& str) { // Function to trim the leading and trailing whitespaces in string
     size_t start = str.find_first_not_of(" \t");
     if (start == string::npos) {
@@ -228,7 +234,7 @@ vector<string> splitString(const string& input, char delimiter) { // split a str
     return tokens;
 }
 
-vector<string> splitByWhitespace(const string& input) { // Split a string by whitespaces.
+vector<string> splitByWhitespace(string& input) { // Split a string by whitespaces.
     vector<string> tokens;
     stringstream ss(input);
     string token;
@@ -444,3 +450,57 @@ pair<string,int> getrs_offset(string offset_rs1) {
 
 uint32_t process_Instruction(string& Inst, uint32_t& Instruction_Address);
 void initialize_globals();
+
+// FUNCTIONS FOR TRACE READER
+// TRACE READER STRUCTURES
+
+struct BTB_Entry { // Branch Target Buffer Entry
+    // uint32_t Instruction_Address; (Part of the BTB_Set)
+    uint32_t target_address;
+
+    int state1; // 1-bit state
+    int state2; // 2-bit state
+};
+
+map<uint32_t, BTB_Entry> BTB; // Branch Target Buffer
+
+// get 32 bit number from string
+uint32_t hex_string_to_uint32(const std::string& hex_string) {
+    // Convert hexadecimal string to unsigned long integer
+    unsigned long ul_value = std::stoul(hex_string.substr(2), nullptr, 16);
+
+    // Ensure the value fits within 32 bits
+    uint32_t uint32_value = ul_value & 0xFFFFFFFF;
+    return uint32_value;
+}
+
+// to check if the current instruction is a branch instruction & get address
+pair<uint32_t, bool> get_info(string &s) {
+    // check the opcode in the string
+    vector<string> temp = splitByWhitespace(s);
+    if(branch_opcodes.find(temp[4]) != branch_opcodes.end()) {
+        return make_pair(hex_string_to_uint32(temp[2]), true); // return true if branch instruction.
+    } return make_pair(hex_string_to_uint32(temp[2]), false);
+}
+
+
+bool predict (int &branch_predictor, uint32_t &IA) {
+    if(branch_predictor == 1) {
+        return 1; // Always taken
+    } else if(branch_predictor == 2) {
+        return 0; // Always Not taken
+    } else if(branch_predictor == 3) {
+        // 1-bit branch predictor
+        return (BTB[IA].state1 == 1);
+    } else {
+        // 2-bit branch predictor
+        return (BTB[IA].state2 <= 1) ? false : true;
+    }
+}
+
+void print_BTB(uint32_t &Instruction_Address) {
+    cout << "Instruction Address " << Instruction_Address << endl;
+    cout << "Target Address " << BTB[Instruction_Address].target_address << endl;
+    cout << BTB[Instruction_Address].state1 << " ";
+    cout << BTB[Instruction_Address].state2 << endl; 
+}
