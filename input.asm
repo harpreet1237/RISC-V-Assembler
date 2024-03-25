@@ -1,3 +1,4 @@
+
 .data
 # Data Segment Test
 byte_test: .byte 2									# Byte			(1 Byte)
@@ -32,3 +33,11 @@ L1: addi x10,x10,-1
 	 mul  x10,x10,x6
 	 jalr x0, x1, 0
 full_exit: # All good, check the stack pointer and register x10
+
+.data
+# Data Segment Test
+byte_test: .byte 2									# Byte			(1 Byte)
+word_test: .word (-1, 0xFFF, 0b11001 , 15636)		# word			(4 Bytes)
+asci_test: .asciiz "Hello World!"					# asciiz char	(1 Byte per char)
+.hwrd_test: .half (123, 0b101011, 0xFACC) 			# Half word 	(2 Bytes)
+.word_test: .byte 2			

@@ -215,7 +215,9 @@ int main(int argc, char *argv[]) {
         auto address = uint32ToHex(entry.first);
         auto machine_code = uint32ToHex(entry.second);
         cout << address << " " << machine_code << endl;
+
     } termination_addr += 4;
     cout << uint32ToHex(termination_addr) << " 0xFFFFFFFF" << endl;
+
     return 0;
 }
